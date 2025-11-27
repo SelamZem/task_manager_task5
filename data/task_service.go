@@ -65,8 +65,13 @@ func GetTaskByID(id string) models.Task {
 
 // Create a new task
 func CreateTask(task models.Task) models.Task {
-	task.ID = primitive.NewObjectID()
-	_, err := taskCollection.InsertOne(ctx, task)
+	count, err := taskCollection.CountDocuments(ctx, bson.M{})
+	if err != nil {
+		task.ID = 1
+	} else {
+		task.ID = int(count) + 1
+	}
+	_, err = taskCollection.InsertOne(ctx, task)
 	if err != nil {
 		return models.Task{}
 	}
@@ -80,7 +85,6 @@ func UpdateTask(id string, updatedTask models.Task) models.Task {
 		return models.Task{}
 	}
 
-	updatedTask.ID = objID
 	_, err = taskCollection.ReplaceOne(ctx, bson.M{"_id": objID}, updatedTask)
 	if err != nil {
 		return models.Task{}
