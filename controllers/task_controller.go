@@ -25,7 +25,7 @@ func getTask(c *gin.Context) {
 	id := c.Param("id")
 	task := data.GetTaskByID(id)
 
-	if task.ID == 0 { // zero-value indicates not found
+	if task.ID.IsZero() { // zero-value indicates not found
 		c.JSON(http.StatusNotFound, gin.H{"error": "task not found"})
 		return
 	}
@@ -55,7 +55,7 @@ func updateTask(c *gin.Context) {
 	}
 
 	updated := data.UpdateTask(id, task)
-	if updated.ID == 0 {
+	if updated.ID.IsZero() {
 		c.JSON(http.StatusNotFound, gin.H{"an error occured": "task not found"})
 		return
 	}

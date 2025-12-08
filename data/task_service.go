@@ -14,19 +14,14 @@ var taskCollection *mongo.Collection
 var ctx = context.TODO()
 
 func init() {
-	// Connect to MongoDB
-	clientOptions := options.Client().ApplyURI("mongodb://localhost:27017")
+	clientOptions := options.Client().ApplyURI(getMongoURI())
 	client, err := mongo.Connect(ctx, clientOptions)
 	if err != nil {
 		panic(err)
 	}
-
-	// Test connection
-	err = client.Ping(ctx, nil)
-	if err != nil {
+	if err = client.Ping(ctx, nil); err != nil {
 		panic(err)
 	}
-
 	taskCollection = client.Database("task_manager").Collection("tasks")
 }
 
@@ -54,7 +49,6 @@ func GetTaskByID(id string) models.Task {
 	if err != nil {
 		return models.Task{}
 	}
-
 	var task models.Task
 	err = taskCollection.FindOne(ctx, bson.M{"_id": objID}).Decode(&task)
 	if err != nil {
@@ -65,7 +59,9 @@ func GetTaskByID(id string) models.Task {
 
 // Create a new task
 func CreateTask(task models.Task) models.Task {
-	task.ID = primitive.NewObjectID()
+	if task.ID.IsZero() {
+		task.ID = primitive.NewObjectID()
+	}
 	_, err := taskCollection.InsertOne(ctx, task)
 	if err != nil {
 		return models.Task{}
@@ -79,7 +75,6 @@ func UpdateTask(id string, updatedTask models.Task) models.Task {
 	if err != nil {
 		return models.Task{}
 	}
-
 	updatedTask.ID = objID
 	_, err = taskCollection.ReplaceOne(ctx, bson.M{"_id": objID}, updatedTask)
 	if err != nil {
@@ -94,7 +89,6 @@ func DeleteTask(id string) {
 	if err != nil {
 		return
 	}
-
 	taskCollection.DeleteOne(ctx, bson.M{"_id": objID})
 }
 
