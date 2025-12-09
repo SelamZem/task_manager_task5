@@ -2,12 +2,10 @@ package domain
 
 import "time"
 
-// Domain models are independent of infrastructure and external libraries.
-
 type User struct {
 	ID        string    `json:"id"`
 	Username  string    `json:"username"`
-	Password  string    `json:"password,omitempty"` // hashed
+	Password  string    `json:"password,omitempty"`
 	Role      string    `json:"role"`
 	CreatedAt time.Time `json:"created_at"`
 }
